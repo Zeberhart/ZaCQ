@@ -1,0 +1,152 @@
+Tokenizing and building vocabulary for code snippets and queries.  This step may take several hours.
+Starting training run neuralbowmodel-2021-08-16-14-31-23 of model NeuralBoWModel with following hypers:
+{'code_token_vocab_size': 10000, 'code_token_vocab_count_threshold': 10, 'code_token_embedding_size': 128, 'code_use_subtokens': False, 'code_mark_subtoken_end': False, 'code_max_num_tokens': 200, 'code_use_bpe': True, 'code_pct_bpe': 0.5, 'code_nbow_pool_mode': 'weighted_mean', 'query_token_vocab_size': 10000, 'query_token_vocab_count_threshold': 10, 'query_token_embedding_size': 128, 'query_use_subtokens': False, 'query_mark_subtoken_end': False, 'query_max_num_tokens': 30, 'query_use_bpe': True, 'query_pct_bpe': 0.5, 'query_nbow_pool_mode': 'weighted_mean', 'batch_size': 1000, 'optimizer': 'Adam', 'seed': 0, 'dropout_keep_rate': 0.9, 'learning_rate': 0.01, 'learning_rate_code_scale_factor': 1.0, 'learning_rate_query_scale_factor': 1.0, 'learning_rate_decay': 0.98, 'momentum': 0.85, 'gradient_clip': 1, 'loss': 'cosine', 'margin': 1, 'max_epochs': 300, 'patience': 5, 'fraction_using_func_name': 0.1, 'min_len_func_name_for_query': 12, 'query_random_token_frequency': 0.0}
+Loading training and validation data.
+Begin Training.
+==== Epoch 0 ====
+  Epoch 0 (train) took 436.41s [processed 4307 samples/second]
+ Training Loss: 0.990278
+  Epoch 0 (valid) took 10.08s [processed 8831 samples/second]
+ Validation:  Loss: 1.023695 | MRR: 0.382263
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 1 ====
+  Epoch 1 (train) took 435.08s [processed 4321 samples/second]
+ Training Loss: 0.942030
+  Epoch 1 (valid) took 10.04s [processed 8861 samples/second]
+ Validation:  Loss: 1.036939 | MRR: 0.470923
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 2 ====
+  Epoch 2 (train) took 435.05s [processed 4321 samples/second]
+ Training Loss: 0.905036
+  Epoch 2 (valid) took 10.04s [processed 8863 samples/second]
+ Validation:  Loss: 1.035957 | MRR: 0.491510
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 3 ====
+  Epoch 3 (train) took 434.86s [processed 4323 samples/second]
+ Training Loss: 0.888608
+  Epoch 3 (valid) took 10.01s [processed 8894 samples/second]
+ Validation:  Loss: 1.033848 | MRR: 0.497783
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 4 ====
+  Epoch 4 (train) took 434.98s [processed 4322 samples/second]
+ Training Loss: 0.879176
+  Epoch 4 (valid) took 10.03s [processed 8874 samples/second]
+ Validation:  Loss: 1.033253 | MRR: 0.503599
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 5 ====
+  Epoch 5 (train) took 435.08s [processed 4321 samples/second]
+ Training Loss: 0.873003
+  Epoch 5 (valid) took 10.02s [processed 8881 samples/second]
+ Validation:  Loss: 1.032566 | MRR: 0.507552
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 6 ====
+  Epoch 6 (train) took 435.17s [processed 4320 samples/second]
+ Training Loss: 0.868243
+  Epoch 6 (valid) took 10.00s [processed 8900 samples/second]
+ Validation:  Loss: 1.031384 | MRR: 0.508500
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 7 ====
+  Epoch 7 (train) took 435.31s [processed 4318 samples/second]
+ Training Loss: 0.864593
+  Epoch 7 (valid) took 10.01s [processed 8889 samples/second]
+ Validation:  Loss: 1.032100 | MRR: 0.509247
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 8 ====
+  Epoch 8 (train) took 435.48s [processed 4317 samples/second]
+ Training Loss: 0.861838
+  Epoch 8 (valid) took 10.05s [processed 8855 samples/second]
+ Validation:  Loss: 1.031060 | MRR: 0.509428
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 9 ====
+  Epoch 9 (train) took 435.46s [processed 4317 samples/second]
+ Training Loss: 0.859108
+  Epoch 9 (valid) took 10.02s [processed 8885 samples/second]
+ Validation:  Loss: 1.031128 | MRR: 0.510859
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 10 ====
+  Epoch 10 (train) took 435.52s [processed 4316 samples/second]
+ Training Loss: 0.857221
+  Epoch 10 (valid) took 10.06s [processed 8850 samples/second]
+ Validation:  Loss: 1.030627 | MRR: 0.512348
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 11 ====
+  Epoch 11 (train) took 435.27s [processed 4319 samples/second]
+ Training Loss: 0.855381
+  Epoch 11 (valid) took 10.02s [processed 8879 samples/second]
+ Validation:  Loss: 1.031437 | MRR: 0.510541
+==== Epoch 12 ====
+  Epoch 12 (train) took 435.15s [processed 4320 samples/second]
+ Training Loss: 0.853879
+  Epoch 12 (valid) took 10.09s [processed 8819 samples/second]
+ Validation:  Loss: 1.029997 | MRR: 0.512784
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 13 ====
+  Epoch 13 (train) took 435.43s [processed 4317 samples/second]
+ Training Loss: 0.852500
+  Epoch 13 (valid) took 10.03s [processed 8875 samples/second]
+ Validation:  Loss: 1.030622 | MRR: 0.511550
+==== Epoch 14 ====
+  Epoch 14 (train) took 435.66s [processed 4315 samples/second]
+ Training Loss: 0.851116
+  Epoch 14 (valid) took 10.04s [processed 8860 samples/second]
+ Validation:  Loss: 1.030610 | MRR: 0.513237
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 15 ====
+  Epoch 15 (train) took 435.05s [processed 4321 samples/second]
+ Training Loss: 0.850130
+  Epoch 15 (valid) took 10.04s [processed 8860 samples/second]
+ Validation:  Loss: 1.031345 | MRR: 0.512341
+==== Epoch 16 ====
+  Epoch 16 (train) took 435.52s [processed 4316 samples/second]
+ Training Loss: 0.849177
+  Epoch 16 (valid) took 10.05s [processed 8855 samples/second]
+ Validation:  Loss: 1.031252 | MRR: 0.513749
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 17 ====
+  Epoch 17 (train) took 434.40s [processed 4327 samples/second]
+ Training Loss: 0.848211
+  Epoch 17 (valid) took 10.07s [processed 8838 samples/second]
+ Validation:  Loss: 1.030619 | MRR: 0.514130
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 18 ====
+  Epoch 18 (train) took 434.56s [processed 4326 samples/second]
+ Training Loss: 0.847438
+  Epoch 18 (valid) took 10.02s [processed 8884 samples/second]
+ Validation:  Loss: 1.030496 | MRR: 0.514256
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 19 ====
+  Epoch 19 (train) took 434.64s [processed 4325 samples/second]
+ Training Loss: 0.846402
+  Epoch 19 (valid) took 10.08s [processed 8830 samples/second]
+ Validation:  Loss: 1.030521 | MRR: 0.513520
+==== Epoch 20 ====
+  Epoch 20 (train) took 434.74s [processed 4324 samples/second]
+ Training Loss: 0.845984
+  Epoch 20 (valid) took 10.03s [processed 8874 samples/second]
+ Validation:  Loss: 1.030393 | MRR: 0.515057
+  Best result so far -- saved model as '/home/zack/ownCloud/clarify/codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz'.
+==== Epoch 21 ====
+  Epoch 21 (train) took 434.39s [processed 4327 samples/second]
+ Training Loss: 0.845400
+  Epoch 21 (valid) took 10.07s [processed 8841 samples/second]
+ Validation:  Loss: 1.030496 | MRR: 0.514575
+==== Epoch 22 ====
+  Epoch 22 (train) took 434.49s [processed 4326 samples/second]
+ Training Loss: 0.844597
+  Epoch 22 (valid) took 10.04s [processed 8867 samples/second]
+ Validation:  Loss: 1.031172 | MRR: 0.513516
+==== Epoch 23 ====
+  Epoch 23 (train) took 434.22s [processed 4329 samples/second]
+ Training Loss: 0.844252
+  Epoch 23 (valid) took 10.03s [processed 8872 samples/second]
+ Validation:  Loss: 1.030473 | MRR: 0.513662
+==== Epoch 24 ====
+  Epoch 24 (train) took 434.31s [processed 4328 samples/second]
+ Training Loss: 0.843505
+  Epoch 24 (valid) took 9.98s [processed 8916 samples/second]
+ Validation:  Loss: 1.031372 | MRR: 0.514844
+==== Epoch 25 ====
+  Epoch 25 (train) took 434.51s [processed 4326 samples/second]
+ Training Loss: 0.843121
+  Epoch 25 (valid) took 10.07s [processed 8840 samples/second]
+ Validation:  Loss: 1.030931 | MRR: 0.513603

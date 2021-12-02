@@ -1,3 +1,11 @@
+import os
+import sys
+rootdir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..")
+sys.path.append(os.path.join(rootdir, "CodeSearchNet", "src"))
+
+from dataextraction.python.parse_python_data import tokenize_docstring_from_string
+import model_restore_helper
+
 import stanza
 from simplenlg import *
 from stanza.server import CoreNLPClient
@@ -8,9 +16,7 @@ from sklearn.metrics import pairwise
 import pickle
 import re
 import shutil
-import sys
 
-import os.path
 from collections import defaultdict, Counter
 from annoy import AnnoyIndex
 from docopt import docopt
@@ -21,8 +27,7 @@ from tqdm import tqdm
 import wandb
 from wandb.apis import InternalApi
 
-from dataextraction.python.parse_python_data import tokenize_docstring_from_string
-import model_restore_helper
+
 
 
 class CSNCodeSearch(object):
@@ -126,15 +131,3 @@ class CSNCodeSearch(object):
         
         idxs, distances = self.search_index.get_nns_by_vector(query_vector, results, include_distances=True)
         return idxs, distances, query_vector
-    
-
-        
-if __name__ == "__main__":
-    definitions_path = '../codesearchnet/resources/data/java_dedupe_definitions_v2.pkl'
-    model_path = "../codesearchnet/resources/saved_models/neuralbowmodel-2021-05-20-17-32-09_model_best.pkl.gz"
-    code_search = CSNCodeSearch(definitions_path, model_path, index_path)
-    indices, distances = code_search.search("How do I graph a plot in Javascript?")
-    for definition in code_search.get_function_definitions(indices):
-        print(definition["identifier"])
-        print()
-

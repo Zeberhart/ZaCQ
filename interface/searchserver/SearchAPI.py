@@ -1,4 +1,3 @@
-import json as js
 import time
 import traceback
 import sys
@@ -8,15 +7,15 @@ import nltk
 import threading
 import asyncio
 import websockets
+import json as js
 
 from sanic import Sanic
 from sanic.response import file
 from sanic.response import json, text
 
+rootdir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..","..")
+sys.path.append(os.path.join(rootdir, "codesearch"))
 import codesearch
-
-# rootdir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "..")
-# sys.path.append(os.path.join(rootdir, "src"))
 
 application = Sanic(name="SearchAPI")
 
@@ -28,11 +27,6 @@ model_path = "../codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-
 code_search = codesearch.CSNCodeSearch(model_path, search_index_path = index_path, vectors_path = vectors_path)
 code_search.load_definitions(definitions_path)
 print("(Java) Definitions loaded")
-
-# @application.route('/functions/<library>')
-# async def functions(request, library):
-#     data = shared_envs[library].functions
-#     return json(data, headers={"Access-Control-Allow-Origin": "*"})
 
 def search(query):
     indices, distances, query_vector = code_search.search_text(query)
@@ -79,7 +73,6 @@ async def feed(request, ws):
             traceback.print_exc()
             await ws.send(js.dumps({"type":"ERROR", "text":"ERROR"}))
             
-
 async def connect(uri):
     async with websockets.connect(uri) as ws:
         await ws.send(js.dumps({"type": "set-server-role", "role": "search"}))
@@ -113,25 +106,12 @@ async def connect(uri):
                 response = {"type":"ERROR", "text":"ERROR"}
                 response['cid'] = data["cid"]
                 await ws.send(js.dumps(response))
-            
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-s', action='store_true')
-    args = parser.parse_args()
-    if args.s:
-        application.run(host="0.0.0.0", 
-                        port=os.environ.get('PORT') or 8002, 
-                        debug=True)
-    else:
-        uri = "wss://handoff-server.herokuapp.com/server"
-        while True:
-            try:
-                asyncio.get_event_loop().run_until_complete(connect(uri))
-            except:
-                print("Lost connection, retrying in 1 second...")
-                time.sleep(5)
-        
+    application.run(host="0.0.0.0", 
+                    port=os.environ.get('PORT') or 8002, 
+                    debug=True)
+    
 
 
 

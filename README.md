@@ -8,7 +8,7 @@ It consists of three parts:
 
 * codesearch/ - API to access the CodeSearchNet datasets and neural bag-of-words code retrieval method.
 
-* cq/ - Implementation of the ZaCQ system, including an implementtion of the the [TaskNav](https://www.cs.mcgill.ca/~swevo/tasknav/) development task extraction algorithm and two baseline query refinement methods.
+* cq/ - Implementation of the ZaCQ system, including an implementation of the the [TaskNav](https://www.cs.mcgill.ca/~swevo/tasknav/) development task extraction algorithm and two baseline query refinement methods.
 
 * evaluation/ - Scripts to run and evaluate ZaCQ.
 

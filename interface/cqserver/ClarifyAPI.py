@@ -9,39 +9,34 @@ import threading
 import asyncio
 import pickle 
 import nltk
-from re import finditer
 import re
-from lemminflect import getLemma
+import concepts
 import websockets
 import traceback
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import TruncatedSVD
-
-import concepts
-
-from tqdm import tqdm
 import pandas as pd
 import numpy as np
+
+from lemminflect import getLemma
+from re import finditer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+from tqdm import tqdm
 from collections import defaultdict
 from sklearn.metrics import pairwise
+from sanic import Sanic
+from sanic.response import file
+from sanic.response import json, text
 
 from nltk.corpus import stopwords
 stop = list(stopwords.words('english'))
 stop.extend("return returns param params parameter parameters code class inheritdoc".split())
 
-
-from sanic import Sanic
-from sanic.response import file
-from sanic.response import json, text
+rootdir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..")
+sys.path.append(os.path.join(rootdir, "cq"))
 
 import zacq
 import kwcq
 import tasks
-
-
-# rootdir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "..")
-# sys.path.append(os.path.join(rootdir, "src"))
 
 application = Sanic(name="SearchAPI")
 language = "java"
@@ -49,14 +44,6 @@ language = "java"
 ###ZACQ
 cq_cache={}
 task_extractor = tasks.TaskExtractor()
-
-# task_df = pickle.load(open(f"../data/output/{language}_task_dfs.pkl", "rb"))    
-
-# def make_results_task_df(indices):
-#     results_task_df = task_df.loc[task_df['row'].isin(indices)]
-#     for i, index in enumerate(indices):
-#         results_task_df['row'].replace(index, i, inplace=True)
-#     return results_task_df
 
 def generate_zacq(indices, identifiers, docstrings, set_values, not_values, query):
     task_df = None
@@ -79,13 +66,6 @@ def generate_zacq(indices, identifiers, docstrings, set_values, not_values, quer
             task_df = new_task_df
         else:
             task_df=task_df.append(new_task_df)
-#     if query in cq_cache:
-#         task_df = cq_cache[query]
-#     else:
-#         documents = [create_document(identifier, docstring) for identifier, docstring in zip(identifiers, docstrings)]
-#         task_df = zacq.create_task_df(documents, indices, task_extractor)
-#         cq_cache[query] = task_df
-
     question, inferred_values, target_slot, answers = zacq.generate_cq(task_df = task_df, 
                                                                        set_values=set_values, 
                                                                        not_values=not_values,
@@ -122,14 +102,11 @@ def generate_zacq(indices, identifiers, docstrings, set_values, not_values, quer
         answers = {",".join([word if word else "" for word in k]): [int(v) for v in answers[k]] for k in answers}
     else: 
         answers = {k: [int(v) for v in answers[k]] for k in answers}
-    
-    
     return {"type": "cq", "question":question, "inferred_values":inferred_values, "target":target_slot, "answers":answers, "rejectables":diff_rows, "reject_candidates":reject_candidates}
 
 
 
 ###KWCQ
-
 kw_cache={}
 NUM_KEYWORDS=25
 print("loading keyword data...")
@@ -288,24 +265,9 @@ async def connect(uri):
                 await ws.send(js.dumps(response))
     
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-s', action='store_true')
-    args = parser.parse_args()
-    if args.s:
-        application.run(host="0.0.0.0", 
-                        port=os.environ.get('PORT') or 8003, 
-                        debug=True)
-    else:
-        uri = "wss://handoff-server.herokuapp.com/server"
-        while True:
-            try:
-                asyncio.get_event_loop().run_until_complete(connect(uri))
-            except Exception as e:
-                print(e)
-                traceback.print_exc()
-
-                print("Lost connection, retrying in 1 second...")
-                time.sleep(5)
+    application.run(host="0.0.0.0", 
+                    port=os.environ.get('PORT') or 8003, 
+                    debug=True)
         
 
 
