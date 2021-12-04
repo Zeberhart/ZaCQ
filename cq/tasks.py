@@ -26,13 +26,16 @@ import nltk.tree
 from spacy.matcher import Matcher, DependencyMatcher
 from spacy.symbols import ORTH, POS, NOUN, VERB
 from spacy.language import Language
+from pathlib import Path
+
+rules_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "data", "tasks")
 
 
 class TaskExtractor:
 
     object_prepositions = ["of"]
     
-    def __init__(self, rules_dir="../data/tasks/"):
+    def __init__(self, rules_dir=rules_path):
         self.nlp = spacy.load("en_core_web_trf")
         with open(os.path.join(rules_dir, "coderegex.txt"), "r") as c_file:
             self.regexes = [line.strip() for line in c_file if line.strip()]

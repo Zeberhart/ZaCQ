@@ -43,7 +43,7 @@ language = "java"
 
 ###ZACQ
 cq_cache={}
-task_extractor = tasks.TaskExtractor()
+task_extractor = tasks.TaskExtractor(rules_dir="../../data/tasks")
 
 def generate_zacq(indices, identifiers, docstrings, set_values, not_values, query):
     task_df = None
@@ -110,7 +110,8 @@ def generate_zacq(indices, identifiers, docstrings, set_values, not_values, quer
 kw_cache={}
 NUM_KEYWORDS=25
 print("loading keyword data...")
-keyword_data = pickle.load(open("../data/output/keyword_data", "rb"))
+keyword_data_path = os.path.join("..", "..", "data", "keyword_data", f"{language}_keyword_data.pkl")
+keyword_data = pickle.load(open(keyword_data_path, "rb"))
 
 class CodeTokenizer():
     w_tokenizer = nltk.tokenize.RegexpTokenizer(r'[^\d\W]+')
@@ -138,16 +139,16 @@ code_tokenizer = CodeTokenizer()
 
 def create_context(result_indices, identifiers, docstrings, query):
 
-    result_vectors = keyword_data[language]["fvectors"][result_indices]
+    result_vectors = keyword_data["fvectors"][result_indices]
     avg_result_vector = np.average(result_vectors, axis=0).reshape(1, -1)
-    other_indices = list(set(range(len(keyword_data[language]["fvectors"]))).difference(set(result_indices)))
-    other_vectors = keyword_data[language]["fvectors"][other_indices]
+    other_indices = list(set(range(len(keyword_data["fvectors"]))).difference(set(result_indices)))
+    other_vectors = keyword_data["fvectors"][other_indices]
     avg_other_vector = np.average(other_vectors, axis=0).reshape(1, -1)
-    result_term_similarities = pairwise.cosine_similarity(avg_result_vector, keyword_data[language]["kvectors"])[0]
-    other_term_similarities = pairwise.cosine_similarity(avg_other_vector, keyword_data[language]["kvectors"])[0]
+    result_term_similarities = pairwise.cosine_similarity(avg_result_vector, keyword_data["kvectors"])[0]
+    other_term_similarities = pairwise.cosine_similarity(avg_other_vector, keyword_data["kvectors"])[0]
     similarity_diff = result_term_similarities-other_term_similarities
 
-    term_indices_in_results = list(set(keyword_data[language]["train_data"][result_indices].nonzero()[1]))
+    term_indices_in_results = list(set(keyword_data["train_data"][result_indices].nonzero()[1]))
     mask = np.full(len(similarity_diff), -np.inf)
     mask[term_indices_in_results] = 0
     similarity_diff+=mask
@@ -157,7 +158,7 @@ def create_context(result_indices, identifiers, docstrings, query):
 
     ind = np.argpartition(similarity_diff, -num_keywords)[-num_keywords:]
     ind = ind[np.argsort(similarity_diff[ind])]
-    all_query_result_kws = [keyword_data[language]["terms"][i] for i in ind]
+    all_query_result_kws = [keyword_data["terms"][i] for i in ind]
     all_query_result_kws = [kw for kw in all_query_result_kws if kw not in query_kws][:NUM_KEYWORDS]
     df_list = []
     for identifier, docstring in zip(identifiers, docstrings):
@@ -227,43 +228,7 @@ async def feed(request, ws):
             print(e)
             traceback.print_exc()
             await ws.send(js.dumps({"type":"ERROR", "text":"ERROR"}))
-            
-async def connect(uri):
-    async with websockets.connect(uri) as ws:
-        await ws.send(js.dumps({"type": "set-server-role", "role": "clarify"}))
-        print("connected")
-        while True:
-            data = await ws.recv()        
-            try:
-                data = js.loads(data)
-                if data["type"] == "generate-cq":
-                    indices = [int(i) for i in data["indices"]]
-                    docstrings = data["docstrings"]
-                    set_values = data["set_values"]
-                    identifiers = data["identifiers"]
-                    query = data["query"]
-                    not_values = data["not_values"]
-                    response = generate_zacq(indices, identifiers, docstrings, set_values, not_values, query)
-                    response["cid"] = data["cid"]
-                    await ws.send(js.dumps(response))
-                elif data["type"] == "generate-kw":
-                    indices = [int(i) for i in data["indices"]]
-                    identifiers = data["identifiers"]
-                    docstrings = data["docstrings"]
-                    intents = data["intents"]
-                    not_intents = data["not_intents"]
-                    query = data["query"]
-                    response = generate_kwcq(indices, identifiers, docstrings, intents, not_intents, query)
-                    response["cid"] = data["cid"]
-                    await ws.send(js.dumps(response))
-            except Exception as e: 
-                print("Error:")
-                print(e)
-                traceback.print_exc()
-                response = {"type":"ERROR", "text":"ERROR"}
-                response["cid"] = data["cid"]
-                await ws.send(js.dumps(response))
-    
+
 if __name__ == '__main__':
     application.run(host="0.0.0.0", 
                     port=os.environ.get('PORT') or 8003, 

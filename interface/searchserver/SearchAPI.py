@@ -17,16 +17,17 @@ rootdir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..","..")
 sys.path.append(os.path.join(rootdir, "codesearch"))
 import codesearch
 
+language = "java"
 application = Sanic(name="SearchAPI")
 
-definitions_path = '../codesearchnet/resources/data/java_dedupe_definitions_v2.pkl'
-vectors_path = "../data/output/java_function_vectors.pkl"
-index_path = "../data/output/java_search_index.pkl"
-model_path = "../codesearchnet/resources/saved_models/neuralbowmodel-2021-08-16-14-31-23_model_best.pkl.gz"
+definitions_path = os.path.join(rootdir, "CodeSearchNet", "resources", "data", f"{language}_dedupe_definitions_v2.pkl") 
+vectors_path = os.path.join(rootdir, "data", "vectors", f"{language}_vectors.pkl") 
+index_path = os.path.join(rootdir, "data", "annoy_indexes", f"{language}_indexes.pkl") 
+model_path = os.path.join(rootdir, "data", "models", "neuralbowmodel.pkl.gz") 
 
 code_search = codesearch.CSNCodeSearch(model_path, search_index_path = index_path, vectors_path = vectors_path)
 code_search.load_definitions(definitions_path)
-print("(Java) Definitions loaded")
+print(f"{language} Definitions loaded")
 
 def search(query):
     indices, distances, query_vector = code_search.search_text(query)
@@ -44,15 +45,10 @@ def search_and_rerank(query, candidates, rejects, mode):
 def get_data(indices):
     return {"type": "data", "data":code_search.get_definitions(indices)}
 
-@application.route('/aaa')
-async def aaa(request):
-    return json({"type":"AAAHHHH", "text":"AAAAHHHHHHH"})
-
-
 @application.websocket('/feed')
 async def feed(request, ws):
     while True:
-        data = await ws.recv()        
+        data = await ws.recv()  
         try:
             data = js.loads(data)
             if data["type"] == "search":
@@ -63,7 +59,7 @@ async def feed(request, ws):
                 candidates = data["candidates"]
                 rejects = data["rejects"]
                 mode = data["mode"]
-                await ws.send(js.dumps(search_and_rerank(query, candidates,rejects, )))
+                await ws.send(js.dumps(search_and_rerank(query, candidates,rejects, mode)))
             elif data["type"] == "get-data":
                 indices = data["indices"]
                 await ws.send(js.dumps(get_data(indices)))
@@ -72,40 +68,7 @@ async def feed(request, ws):
             print(e)
             traceback.print_exc()
             await ws.send(js.dumps({"type":"ERROR", "text":"ERROR"}))
-            
-async def connect(uri):
-    async with websockets.connect(uri) as ws:
-        await ws.send(js.dumps({"type": "set-server-role", "role": "search"}))
-        print("connected")
-        while True:
-            data = await ws.recv()        
-            try:
-                data = js.loads(data)
-                if data["type"] == "search":
-                    query = data["query"]
-                    response = search(query)
-                    response['cid'] = data["cid"]
-                    await ws.send(js.dumps(response))
-                elif data["type"] == "search-rerank":
-                    query = data["query"]
-                    candidates = data["candidates"]
-                    rejects = data["rejects"]
-                    mode = data["mode"]
-                    response = search_and_rerank(query, candidates,rejects, mode)
-                    response['cid'] = data["cid"]
-                    await ws.send(js.dumps(response))
-                elif data["type"] == "get-data":
-                    indices = data["indices"]
-                    response = get_data(indices)
-                    response['cid'] = data["cid"]
-                    await ws.send(js.dumps(response))
-            except Exception as e: 
-                print("Error:")
-                print(e)
-                traceback.print_exc()
-                response = {"type":"ERROR", "text":"ERROR"}
-                response['cid'] = data["cid"]
-                await ws.send(js.dumps(response))
+
 
 if __name__ == '__main__':
     application.run(host="0.0.0.0", 

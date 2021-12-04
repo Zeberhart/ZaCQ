@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef} from 'react';
 // import ReactDOM from 'react-dom';
-import { config } from './config.js'
 
 import PuffLoader from "react-spinners/PuffLoader";
 import ReactPaginate from 'react-paginate';
@@ -10,10 +9,6 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import { generateId } from 'zoo-ids';
-
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
 
 import './App.css';
 import Searchbar from "./Searchbar"
@@ -26,15 +21,16 @@ import {CQ, KW} from "./Refinement"
 function Search(props){
    
     const modes = ["cq", "kw"]
-    const db = firebase.firestore()
     const [user, setUser] = useState(generateId(Date.now()));
     const [mode, setMode] = useState(modes[0]);
     const [logging, setLogging] = useState(false);
     const [settingsShow, setSettingsShow] = React.useState(false);
     const [submitUIShow, setSubmitUIShow] = React.useState(false);
 
-    const ws = useRef(null);
-    const [connected, setConnected] = useState(false);
+    const c_ws = useRef(null);
+    const [c_connected, c_setConnected] = useState(false);
+    const s_ws = useRef(null);
+    const [s_connected, s_setConnected] = useState(false);
 
     const [ready, setReady] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -70,7 +66,6 @@ function Search(props){
           ws.current = new WebSocket(path);  
 
           ws.current.onopen = e => {
-//             recordAction("server_connected", {})  //Not sure why it's *not* using stale state values
             console.log("ws open");
             callback(true)
           };
@@ -93,21 +88,23 @@ function Search(props){
           };
       }
         
-      connect(ws, config.url, setConnected)
+      connect(s_ws, "ws://localhost:8002/feed", s_setConnected)
+      connect(c_ws, "ws://localhost:8003/feed", c_setConnected)
       return () => {
-          ws.current.close();
+          c_ws.current.close();
+          s_ws.current.close();
       };
     }, []);
 
     //When connection statuses change, update ready state variable
     useEffect(() => {
-        if(connected){
+        if(s_connected && c_connected){
             setReady(true)
             setLoading(false)
         }else{
             setReady(false)
         }
-    }, [connected]);
+    }, [s_connected, c_connected]);
 
     //Process new data received from a server
     useEffect(() => {
@@ -122,11 +119,6 @@ function Search(props){
           if(newData["type"] === "typing"){
               //Currently irrelevant, leftover from old project.
           }else if(newData["type"] === "results"){
-            if(noRefinements()){
-                // Record new results only for new searches, not refinements
-                //Not sure why it's *not* using stale state values
-                recordAction("new_results", {"query": lastSearch, "fids":newData["indices"]})  
-            }
             setResults(newData["indices"])
             //Not sure why it's *not* using stale state values
             sendMessage("search", "get-data", {"indices": newData["indices"]})
@@ -143,12 +135,10 @@ function Search(props){
                 sendMessage("clarify", "generate-kw", payload)
             }
           }else if(newData["type"] === "cq"){
-            recordAction("new_cq", newData)   //Not sure why it's *not* using stale state values
             setCQData(newData)
             setKWData(null)
             setLoading(false)
           }else if(newData["type"] === "kw"){
-            recordAction("new_kw", newData)   //Not sure why it's *not* using stale state values
             setKWData(newData)
             setCQData(null)
             setLoading(false)
@@ -176,18 +166,12 @@ function Search(props){
 
     function sendMessage(server, type, content={}){
         if(ready){
-            const message = JSON.stringify({server:server, type:type, mode:mode, ...content})
-            ws.current.send(message)
-        }
-    }
-    
-    function recordAction(action_type, payload){
-        if(logging){
-            db.collection("users").doc(user).collection("actions").add({
-             "action":action_type,
-             "time":Date.now(),
-             "payload":payload
-            })
+            const message = JSON.stringify({type:type, mode:mode, ...content})
+            if(server === "clarify"){
+                c_ws.current.send(message)
+            }else{
+                s_ws.current.send(message)
+            }
         }
     }
 
@@ -196,7 +180,6 @@ function Search(props){
     /////////////////////////////////////
 
     function submitQuery(){
-       recordAction("search", {"query":input.trim()})
        sendMessage("search", "search", {query:input.trim(), text:input.trim()})
        setLastSearch(input.trim())
        resetCQState()
@@ -207,7 +190,6 @@ function Search(props){
 
     
     function answerCQ(answer){
-       recordAction("answer_cq", {"query":lastSearch, "answer":answer, "set_values": setValues, "not_values":notValues})
        updateHistory()
        if (answer!==null){
            acceptCQAnswer(answer)
@@ -219,7 +201,6 @@ function Search(props){
     }
 
     function answerKW(answer){
-       recordAction("answer_kw", {"query":lastSearch, "answer":answer, "intents": intents, "not_intents":notIntents})
        console.log(answer)
        updateHistory()
        if (answer!==null){
@@ -233,7 +214,6 @@ function Search(props){
 
     function undoRefinement(){
        if(history.length){
-           recordAction("undo_refinement", {"query":lastSearch,})
            wait()
            const oldState = history[history.length-1]
            setRejects(oldState.rejects)
@@ -248,7 +228,6 @@ function Search(props){
     }
     
     function resetRefinement(){
-        recordAction("resetRefinement", {"query":lastSearch,})
         wait()
         setHistory([])
         resetCQState()
@@ -257,7 +236,6 @@ function Search(props){
     }
 
     function changePage(newPage){
-        recordAction("changePage", {"query":lastSearch, "page":newPage})
         setPage(newPage)
     }
 
@@ -382,7 +360,6 @@ function Search(props){
     }
 
     function chooseResult(result){
-        recordAction("select-result", {identifier: result.identifier, url: result.url})
         setSubmitUIShow(true)
 //         resetAll()
     }
@@ -397,12 +374,6 @@ function Search(props){
             setMode={changeMode}
             logging={logging}
             setLogging={setLogging}
-        />
-        <SubmitUI
-            show={submitUIShow}
-            onHide={() => setSubmitUIShow(false)}
-            user={user}
-            recordAction={recordAction}
         />
                     
         <div className="w-100 px-3 sticky-top d-flex flex-column align-items-center" style={{top: -25, scrollBehavior:'auto'}}>
